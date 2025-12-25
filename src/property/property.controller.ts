@@ -12,9 +12,16 @@ import {
 } from '@nestjs/common';
 import { CreatePropertyDTO } from './dto/createProperty.dto';
 import { ParseIdPipe } from './pipes/parseIdPipe';
+import { RequestHeader } from './pipes/request-header';
+import { HeaderDto } from './dto/headers.dto';
+import { PropertyService } from './property.service';
 
 @Controller('property')
 export class PropertyController {
+  constructor(private readonly propertyService: PropertyService) {
+    this.propertyService = propertyService;
+  }
+
   @Get('getProperty/:id')
   @HttpCode(201)
   getProperty(
@@ -23,16 +30,21 @@ export class PropertyController {
   ) {
     console.log(typeof id, id);
     console.log(typeof sort, sort);
-    return { id, sort };
+    return this.propertyService.getProperty(id, sort);
   }
 
   @Post('createProperty')
-  createProperty(@Body() body: CreatePropertyDTO) {
-    return body;
+  createProperty(
+    @RequestHeader(HeaderDto)
+    headers: HeaderDto,
+    @Body() body: CreatePropertyDTO,
+  ) {
+    console.log(headers);
+    return this.propertyService.createProperty(body);
   }
 
   @Patch('updateProperty')
   updateProperty(@Body() body: CreatePropertyDTO) {
-    return body;
+    return this.propertyService.updateProperty(body.id, body);
   }
 }
